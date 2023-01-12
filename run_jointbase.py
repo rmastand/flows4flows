@@ -40,7 +40,8 @@ def main(cfg: DictConfig) -> None:
 
     if cfg.general.ncond is None or cfg.general.ncond < 1:
         print(
-            f"Cannot train Flows4Flows on the same base distribution without any conditions. You specified cfg.general.ncond = {cfg.general.ncond}. Exiting now.")
+            f"Cannot train Flows4Flows on the same base distribution without any conditions. "
+            f"You specified cfg.general.ncond = {cfg.general.ncond}. Exiting now.")
         exit(42)
 
     # Set device
