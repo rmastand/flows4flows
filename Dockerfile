@@ -16,7 +16,6 @@ RUN apt-get -qq -y update && \
 COPY requirements.txt .
 
 RUN python3 -m pip install -r requirements.txt
-RUN python3 -m pip install .
 
 COPY setup.py .
 COPY ffflows/ .
