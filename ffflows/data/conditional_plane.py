@@ -2,6 +2,7 @@
 
 import torch
 from nflows.utils import tensor2numpy
+from torch.utils.data import Dataset
 
 from ffflows.data.plane import PlaneDataset
 import numpy as np
@@ -21,6 +22,23 @@ class ConditionalPlaneDataset(PlaneDataset):
 
     def get_tuple(self):
         return self.data, self.conditions
+    
+    
+    
+class ScienceDataset(Dataset):
+    def __init__(self, data, conditions):
+        self.data = data
+        self.conditions = conditions
+
+    def __getitem__(self, item):
+        return self.data[item], self.conditions[item]
+    
+    def __len__(self):
+        return self.data.shape[0]
+        
+    def get_tuple(self):
+        return self.data, self.conditions
+
 
 
 class ConditionalWrapper(ConditionalPlaneDataset):
