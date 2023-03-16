@@ -16,6 +16,8 @@ from ffflows.utils import shuffle_tensor
 from nflows import transforms
 from nflows.utils import tensor2numpy
 
+from dense import dense_net
+
 import pandas as pd
 import numpy as np
 
@@ -153,7 +155,45 @@ def spline_inn(inp_dim, nodes=128, num_blocks=2, num_stack=3, tail_bound=3.5, ta
     return transforms.CompositeTransform(transform_list)
 
 
-def train(model, train_data, val_data, n_epochs, learning_rate, ncond, path, name, rand_perm_target=False,
+def coupling_flow(inp_dim, nodes=128, num_blocks=2, num_stack=3, tail_bound=3.5, tails='linear', activation=F.relu, lu=0,
+               num_bins=10, context_features=None, flow_for_flow=False):
+    
+    # first make the mask
+    n_mask = int(np.ceil(inp_dim / 2))
+    mx = [1] * n_mask + [0] * int(inp_dim - n_mask)
+
+    # then make the maker
+    # this has to be an nn.module that takes as first arg the input dim and second the output dim
+    def maker(input_dim, output_dim):
+        return dense_net(input_dim, output_dim, layers=[nodes] * num_blocks, context_features=context_features)
+    
+    
+    transform_list = []
+    for i in range(num_stack):
+        transform_list += [
+            transforms.PiecewiseRationalQuadraticCouplingTransform(mx, maker, 
+                                                    tail_bound = tail_bound, 
+                                                    tails = tails, 
+                                                    num_bins = num_bins)  ]
+        
+        if lu:
+            transform_list += [transforms.LULinear(inp_dim)]
+        else:
+            transform_list += [transforms.ReversePermutation(inp_dim)]
+
+    if not (flow_for_flow and (num_stack % 2 == 0)):
+        # If the above conditions are satisfied then you want to permute back to the original ordering such that the
+        # output features line up with their original ordering.
+        transform_list = transform_list[:-1]
+
+    return transforms.CompositeTransform(transform_list)
+
+
+
+
+
+
+def train(model, train_data, val_data, n_epochs, learning_rate, ncond, path, name, train_transfer=False,
           inverse=False, loss_fig=True, device='cpu', gclip=None):
     save_path = pathlib.Path(path / name)
     save_path.mkdir(parents=True, exist_ok=True)
@@ -179,7 +219,8 @@ def train(model, train_data, val_data, n_epochs, learning_rate, ncond, path, nam
             optimizer.zero_grad()
             if ncond is not None:
                 inputs, input_context = data[0].to(device), data[1].to(device)
-                target_context = shuffle_tensor(input_context) if rand_perm_target else None
+                # changed for the science dataset
+                target_context = input_context if train_transfer else None
             else:
                 inputs, input_context, target_context = data.to(device), None, None
 
@@ -198,7 +239,8 @@ def train(model, train_data, val_data, n_epochs, learning_rate, ncond, path, nam
         for v_step, data in enumerate(val_data):
             if ncond is not None:
                 inputs, input_context = data[0].to(device), data[1].to(device)
-                target_context = shuffle_tensor(input_context) if rand_perm_target else None
+                # changed for the science dataset
+                target_context = input_context if train_transfer else None
             else:
                 inputs, input_context, target_context = data.to(device), None, None
 
@@ -326,10 +368,12 @@ def tensor_to_str(tensor):
 
 def dump_to_df(*args, col_names=None):
     data = [tensor2numpy(d) for d in args]
-    if len(np.unique(lens := [len(d) for d in data])) != 1:
+    lens = [len(d) for d in data]
+    shapes = [d.shape[:-1] for d in data]
+    if len(np.unique(lens)) != 1:
         print(f"Arrays not all same length, received f{lens}")
         exit(50)
-    elif len(np.unique(shapes := [d.shape[:-1] for d in data])) != 1:
+    elif len(np.unique(shapes)) != 1:
         print(f"Arrays not all same shape up until last axis, received f{shapes}")
         exit(51)
     data = np.concatenate(data, axis=-1)
