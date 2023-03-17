@@ -66,8 +66,8 @@ def main(cfg: DictConfig) -> None:
     train_dat_cont = torch.from_numpy(np.load("LHCO_data/train_dat_cont.npy").reshape(-1, 1)).to(torch.float32)
     val_dat_cont = torch.from_numpy(np.load("LHCO_data/val_dat_cont.npy").reshape(-1, 1)).to(torch.float32)
     
-    #testt = ScienceDataset(train_sim_data, train_sim_cont)
-    #print(testt.conditions.shape)
+    testt = ScienceDataset(train_sim_data, train_sim_cont)
+    print(testt.conditions.shape)
 
 
     base_data = DataLoader(
