@@ -50,7 +50,8 @@ class FlowForFlow(abc.ABC, flows.Flow):
         if input_context is None:
             return None
         else:
-            return self._direction_func(input_context, target_context).view(-1)
+            direct = self._direction_func(input_context, target_context)
+            return direct.view(-1) if direct is not None else direct
 
     def set_forward_base(self):
         '''Just in case we need to change the base distribution in the subclass'''
@@ -119,17 +120,19 @@ class FlowForFlow(abc.ABC, flows.Flow):
             steps = len(inputs) // batch_size
             outputs = torch.zeros_like(inputs)
             logabsdet = torch.zeros(len(inputs))
-            if target_context is not None and (len(target_context) != len(input_context)):
-                target_context = torch.ones_like(input_context)*target_context
+            if target_context is not None and (target_context.numel() != input_context.numel()):
+                target_context = torch.ones_like(input_context) * target_context
             for step in range(steps):
-                b_inputs = inputs[step*batch_size:(step+1)*batch_size]
-                b_incon = input_context[step*batch_size:(step+1)*batch_size] if input_context is not None else None
-                b_tarcon = target_context[step*batch_size:(step+1)*batch_size] if target_context is not None else None
-                outputs[step*batch_size:(step+1)*batch_size],\
-                    logabsdet[step*batch_size:(step+1)*batch_size] = self.transform(b_inputs,
-                                                                                    b_incon,
-                                                                                    b_tarcon,
-                                                                                    inverse)
+                b_inputs = inputs[step * batch_size:(step + 1) * batch_size]
+                b_incon = input_context[
+                          step * batch_size:(step + 1) * batch_size] if input_context is not None else None
+                b_tarcon = target_context[
+                           step * batch_size:(step + 1) * batch_size] if target_context is not None else None
+                outputs[step * batch_size:(step + 1) * batch_size], \
+                logabsdet[step * batch_size:(step + 1) * batch_size] = self.transform(b_inputs,
+                                                                                      b_incon,
+                                                                                      b_tarcon,
+                                                                                      inverse)
             return outputs, logabsdet
 
     def bd_log_prob(self, noise, input_context=None, target_context=None, inverse=False):
@@ -155,7 +158,8 @@ class FlowForFlow(abc.ABC, flows.Flow):
 
     def log_prob(self, inputs, input_context=None, target_context=None, inverse=False):
         '''
-        log probability of transformed inputs given context, use relevant base distribution based on forward or inverse, infered from context or specified from inverse
+        log probability of transformed inputs given context, use relevant base distribution based on forward or inverse,
+        infered from context or specified from inverse
         Inputs:
             inputs: Input Tensor for transformer
             input_context: Context tensor for samples from left of transformer

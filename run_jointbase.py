@@ -9,11 +9,11 @@ from torch.utils.data import DataLoader
 
 from nflows.distributions import StandardNormal
 
-from utils import get_activation, get_data, get_flow4flow, train, spline_inn, get_conditional_data, tensor_to_str, \
+from ffflows.utils import get_activation, get_flow4flow, train, spline_inn, get_conditional_data, tensor_to_str, \
     set_penalty, get_flow4flow_ncond, dump_to_df
-from plot import plot_data, plot_arrays
+from ffflows.plot import plot_data, plot_arrays
 
-from ffflows.data.dist_to_dist import ConditionalDataToData, ConditionalDataToTarget
+from ffflows.data.dist_to_dist import ConditionalDataToTarget
 
 import numpy as np
 

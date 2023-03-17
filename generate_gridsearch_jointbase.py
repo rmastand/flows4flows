@@ -52,7 +52,9 @@ def main():
 
     name = hpo.get_name_string(nrandom=args.nrandom)
 
-    cmd = '\nsrun singularity exec --nv'
+    cmd = './run_install.sh\n'
+    cmd += 'export PYTHONPATH=${PWD}:${PWD}/python_install:${PYTHONPATH}\n'
+    cmd += '\nsrun singularity exec --nv'
     if args.singularity_mounts is not None:
         cmd += f' -B {args.singularity_mounts}'
     cmd += f' {args.singularity_instance}\\\n\tpython3 {runfile}\\\n\t\toutput.save_dir={args.outputdir}\\\n\t\toutput.name={args.outputname}_${{SLURM_ARRAY_TASK_ID}}_{name}\\\n\t\t'

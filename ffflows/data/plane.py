@@ -281,22 +281,22 @@ class Star(PlaneDataset):
     @staticmethod
     def create_bar(num_per_bar, std=0.1):
         u = torch.rand(num_per_bar)
-        x1 = u+0.3
+        x1 = u + 0.3
         x2 = torch.zeros_like(u)
         data = 2 * torch.stack((x1, x2)).t()
         data += std * torch.randn(data.shape)
         return data
-    
+
     @staticmethod
-    def rotate(x,theta):
-        rot_mat = torch.Tensor([[np.cos(theta),np.sin(theta)],
-                        [-np.sin(theta), np.cos(theta)]])
-        return torch.matmul(x,rot_mat)
+    def rotate(x, theta):
+        rot_mat = torch.Tensor([[np.cos(theta), np.sin(theta)],
+                                [-np.sin(theta), np.cos(theta)]])
+        return torch.matmul(x, rot_mat)
 
     def _create_data(self):
         num_per_bar = self.num_points // self.num_bars
-        angles = np.linspace(0,1,self.num_bars+1)[:-1]*2*np.pi
+        angles = np.linspace(0, 1, self.num_bars + 1)[:-1] * 2 * np.pi
         self.data = torch.cat(
-            [self.rotate(self.create_bar(num_per_bar),theta)
+            [self.rotate(self.create_bar(num_per_bar), theta)
              for theta in angles]
         )

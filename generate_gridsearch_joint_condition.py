@@ -9,7 +9,7 @@ def main():
     hpo = generator()
 
     top_dir = os.path.dirname(os.path.abspath(__file__))
-    pyfile = 'run_twobase_nocond.py'
+    pyfile = 'run_twobase_cond.py'
 
     runfile = os.path.join(top_dir, pyfile)
     logdir = os.path.join(top_dir, f'batch/{args.outputname}/')
@@ -28,36 +28,49 @@ def main():
 
     ###options to test
 
+    # cond = ["'radial'",
+    #         "'rotation'"]
+    cond = [ "'rotation'"]
+
     left_data = [
-        #  "'ring'",
-        "'concentricrings'",
-        "'fourcircles'",
-        "'checkerboard'",
-        #  "'spirals'",
-        "'star'",
-        #  "'eightstar'",
+        # "'concentricrings'",
+        # "'fourcircles'",
+        "'crescentcubed'",
+        # "'checkerboard'",
+        # "'star'",
     ]
     right_data = [
-        #  "'ring'",
-        #  "'concentricrings'",
-        #  "'fourcircles'",
-        "'checkerboard'",
-        "'spirals'",
-        "'star'",
-        "'eightstar'",
+        "'crescent'",
+        # "'checkerboard'",
+        # "'spirals'",
+        # "'star'",
+        # "'eightstar'",
     ]
     f4f_dir = [
         "'alternate'",
-        # "'forward'",
         "'inverse'",
-        #  "'both'",
-        #  "'iterate'"
     ]
 
     penalty = ["None"]
     penalty_weight = ["0"]
     # penalty = ["'l1'", "'l2'"]
     # penalty_weight = ["1", "10", "100"]
+
+    hpo.add_opt('general.n_points', [int(1e5)], True)
+    hpo.add_opt('base_dist.left.nepochs', [2], True)
+    hpo.add_opt('base_dist.right.nepochs', [2], True)
+
+    top_dir = '/home/users/k/kleins/scratch/flows4flows/joint_cond_test_crescents/final_r2_0'
+    hpo.add_opt('base_dist.left.load_path',
+                [f'{top_dir}/base_left/epoch_9_valloss_2.172.pt'],
+                True)
+    hpo.add_opt('base_dist.right.load_path',
+                [f'{top_dir}/base_right/epoch_9_valloss_1.148.pt'],
+                True)
+
+    hpo.add_opt('top_transformer.nepochs', [10], True)
+    hpo.add_opt('base_dist.plot', [1], True)
+    hpo.add_opt('general.condition', cond, True)
 
     hpo.add_opt('base_dist.left.data', left_data, True)
     hpo.add_opt('base_dist.right.data', right_data, True)
@@ -68,20 +81,20 @@ def main():
     hpo.add_script_line('export XDG_RUNTIME_DIR=""')
     hpo.add_script_line('module load GCC/9.3.0 Singularity/3.7.3-Go-1.14', lastline=True)
 
-    name = hpo.get_name_string(nrandom=args.nrandom)
+    # name = hpo.get_name_string(nrandom=args.nrandom)
 
     cmd = './run_install.sh\n'
     cmd += 'export PYTHONPATH=${PWD}:${PWD}/python_install:${PYTHONPATH}\n'
     cmd += '\nsrun singularity exec --nv'
     if args.singularity_mounts is not None:
         cmd += f' -B {args.singularity_mounts}'
-    cmd += f' {args.singularity_instance}\\\n\tpython3 {runfile}\\\n\t\toutput.save_dir={args.outputdir}\\\n\t\toutput.name={args.outputname}_${{SLURM_ARRAY_TASK_ID}}_{name}\\\n\t\t'
+    cmd += f' {args.singularity_instance}\\\n\tpython3 {runfile}\\\n\t\toutput.save_dir={args.outputdir}\\\n\t\toutput.name={args.outputname}_${{SLURM_ARRAY_TASK_ID}}\\\n\t\t'
 
     pathlib.Path(logdir).mkdir(parents=True, exist_ok=True)
     pathlib.Path(args.sbatch_output).parent.mkdir(parents=True, exist_ok=True)
 
     hpo.set_command(cmd)
-    hpo.launch(outputfile=args.sbatch_output, submit=args.submit, nrandom=args.nrandom)
+    hpo.launch(outputfile=args.sbatch_output, submit=args.submit, nrandom=args.nrandom, print=False)
 
     return
 

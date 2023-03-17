@@ -6,7 +6,7 @@ This script is used to install the package and all its dependencies. Run
 to install the package.
 """
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from ffflows.version import VERSION
 
 setup(
@@ -20,5 +20,6 @@ setup(
         "torch",
         "nflows"
     ],
+    packages=find_packages(exclude=["tests"]),
     dependency_links=[],
 )

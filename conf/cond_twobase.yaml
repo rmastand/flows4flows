@@ -1,0 +1,72 @@
+output:
+  save_dir: /srv/beegfs/scratch/groups/rodem/flows4flows/
+  name: test
+
+general:
+  data_dim: 2
+  n_points: 1e4
+  ncond: 1
+  condition: rotation
+
+base_dist:
+  plot: False
+  left:
+    data: crescent
+    load_path: None
+    batch_size: 128
+    lr: 1e-3
+    nepochs: 2
+    gclip: 5
+    nstack: 4
+    nblocks: 2
+    nnodes: 128
+    nbins: 8
+    activation: relu
+    coupling: False
+    coupling_width: 32
+    coupling_depth: 2
+
+  right:
+    data: crescentcubed
+    load_path: None
+    batch_size: 128
+    lr: 1e-3
+    nepochs: 2
+    gclip: 5
+    nstack: 4
+    nblocks: 2
+    nnodes: 128
+    nbins: 8
+    activation: relu
+    coupling: False
+    coupling_width: 32
+    coupling_depth: 2
+
+top_transformer:
+  load_path: None
+  batch_size: 128
+  lr: 1e-4
+  nepochs: 1
+  gclip: 5
+  nstack: 4
+  nblocks: 2
+  nnodes: 128
+  nbins: 8
+  activation: relu
+  coupling: False
+  coupling_width: 32
+  coupling_depth: 2
+  penalty: None
+  penalty_weight: 1
+  anneal: 1
+  direction: alternate
+
+defaults:
+  - _self_
+  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled
+
+hydra:
+  output_subdir: null
+  run:
+    dir: .

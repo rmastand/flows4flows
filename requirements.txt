@@ -1,5 +1,5 @@
 git+https://github.com/bayesiains/nflows.git@569c8ad50941824ccb07aa3a3eb59c85721e0c5f
-omegaconf==2.2.3 
+omegaconf==2.2.3
 hydra-core==1.2.0
 torch==1.8.0
 numpy==1.19.2

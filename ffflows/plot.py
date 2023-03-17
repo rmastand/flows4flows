@@ -2,7 +2,7 @@ import matplotlib
 import pandas as pd
 import torch
 
-from utils import get_numpy_data, get_cond_numpy_data
+from ffflows.utils import get_numpy_data
 
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
