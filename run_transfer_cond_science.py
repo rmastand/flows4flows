@@ -124,12 +124,12 @@ def main(cfg: DictConfig) -> None:
     train_base_data = DataLoader(dataset=ScienceDataset(train_sim_data, train_sim_cont),
         batch_size=cfg.base_dist.batch_size,shuffle=True)
     
-    val_base_data = DataLoader(dataset=ScienceDataset(val_sim_data, val_sim_cont),batch_size=1000)
+    val_base_data = DataLoader(dataset=ScienceDataset(val_sim_data, val_sim_cont), batch_size=1000, shuffle = False)
     
     train_target_data = DataLoader(dataset=ScienceDataset(train_dat_data, train_dat_cont),
-        batch_size=cfg.base_dist.batch_size,shuffle=True)
+        batch_size=cfg.top_transformer.batch_size,shuffle=True)
     
-    val_target_data = DataLoader(dataset=ScienceDataset(val_dat_data, val_dat_cont),batch_size=1000)
+    val_target_data = DataLoader(dataset=ScienceDataset(val_dat_data, val_dat_cont), batch_size=1000, shuffle = False)
 
     # Train base1
     base_flow = BaseFlow(spline_inn(cfg.general.data_dim,
@@ -149,10 +149,10 @@ def main(cfg: DictConfig) -> None:
     else:
         print(f"Training base distribution")
         train_base(base_flow, train_base_data, val_base_data,
-                   cfg.base_dist.nepochs, cfg.base_dist.lr, ncond_base,
-                   outputpath, name=f'base_{label}', device=device, gclip=cfg.base_dist.gclip)
-        with open(outputpath / f'base_{label}' / f'{cfg.base_dist.data.lower()}.yaml', 'w') as file:
-            models =  glob.glob(str((outputpath / f'base_{label}' / 'epoch*pt').resolve()))
+                   cfg.base_dist.nepochs, cfg.base_dist.lr, cfg.general.ncond,
+                   outputpath, name=f'base', device=device, gclip=cfg.base_dist.gclip)
+        with open(outputpath / f'base' / f'{cfg.base_dist.data.lower()}.yaml', 'w') as file:
+            models =  glob.glob(str((outputpath / f'base' / 'epoch*pt').resolve()))
             models.sort(key=os.path.getmtime)
             cfg.base_dist.load_path = models[-1]
             OmegaConf.save(config=cfg.base_dist, f=file)

@@ -5,10 +5,10 @@ batch_size: 128
 lr: 1e-4
 nepochs: 32
 gclip: 5
-nstack: 4
-nblocks: 2
+nstack: 1
+nblocks: 15
 nnodes: 128
-nbins: 8
+nbins: 10
 activation: relu
 coupling: False
 coupling_width: 32

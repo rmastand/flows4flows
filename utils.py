@@ -223,7 +223,7 @@ def train(model, train_data, val_data, n_epochs, learning_rate, ncond, path, nam
                 target_context = input_context if train_transfer else None
             else:
                 inputs, input_context, target_context = data.to(device), None, None
-
+                
             logprob = -model.log_prob(inputs, input_context=input_context, target_context=target_context,
                                       inverse=inverse).mean()
 

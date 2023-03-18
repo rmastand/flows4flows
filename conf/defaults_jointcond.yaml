@@ -10,7 +10,7 @@ output:
   name: test
 
 general:
-  data_dim: 2
+  data_dim: 5
   ncond: 1
   npoints: 1e6
 
