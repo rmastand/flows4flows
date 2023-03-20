@@ -148,9 +148,7 @@ class FlowForFlow(abc.ABC, flows.Flow):
         order = self.direction_func(input_context, target_context)
         if order is None:
             base_flow = self.base_flow_right if inverse is False else self.base_flow_left
-            # TODO commented line is what was being done, uncommented is what you need!!
-            # log_prob = base_flow.log_prob(noise)
-            log_prob = base_flow.log_prob(noise, context=target_context)
+            log_prob = base_flow.log_prob(noise, context=input_context)
         else:
             log_prob = torch.zeros(len(noise)).to(noise)
             for base_flow, mx in zip([self.base_flow_left, self.base_flow_right], [order, ~order]):
