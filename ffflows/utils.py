@@ -319,7 +319,8 @@ def train_batch_iterate(model, train_data, val_data, n_epochs, learning_rate, nc
 
 
 def tensor_to_str(tensor):
-    '''Convert a tensor to a string or list of strings. Can be a tensor of shape (), (N,), (N,M), and any other squeezeable shapes'''
+    '''Convert a tensor to a string or list of strings. Can be a tensor of shape (), (N,), (N,M), and any other
+    squeezeable shapes'''
 
     ##TODO: Have this walk through all dims in the shape tensor to nested lists.
     ###Can squeeze first, then get shape

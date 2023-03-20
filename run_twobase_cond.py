@@ -14,7 +14,7 @@ from ffflows.utils import get_activation, get_data, get_flow4flow, train, train_
 import matplotlib.pyplot as plt
 from ffflows.plot import plot_training, plot_data, plot_arrays
 
-from ffflows.data.dist_to_dist import ConditionalDataToTarget
+from ffflows.data.dist_to_dist import PairedConditionalDataToTarget
 
 import numpy as np
 
@@ -182,8 +182,8 @@ def main(cfg: DictConfig) -> None:
 
     set_penalty(f4flow, cfg.top_transformer.penalty, cfg.top_transformer.penalty_weight, cfg.top_transformer.anneal)
 
-    train_data = ConditionalDataToTarget(*get_datasets(cfg))
-    val_data = ConditionalDataToTarget(*get_datasets(cfg))
+    train_data = PairedConditionalDataToTarget(*get_datasets(cfg))
+    val_data = PairedConditionalDataToTarget(*get_datasets(cfg))
 
     if pathlib.Path(cfg.top_transformer.load_path).is_file():
         print(f"Loading Flow4Flow from model: {cfg.top_transformer.load_path}")
@@ -236,8 +236,12 @@ def main(cfg: DictConfig) -> None:
         debug_dir.mkdir(exist_ok=True, parents=True)
         for con in test_points:
             # Handle the broadcasting
-            left_data, left_cond = [d.to(device) for d in test_data.get_tuple()]
-            right_cond = con.to(device)
+            # TODO this isn't generic across the different conditional datasets
+            con *= test_data.max_angle
+            left_data, left_cond = test_data._get_conditional(con.item())
+            left_data = torch.Tensor(left_data).to(device)
+            left_cond = (left_cond * torch.ones(len(left_data), 1)).to(device)
+            right_cond = left_cond
 
             # Transform the data
             transformed, _ = f4flow.batch_transform(left_data, left_cond, right_cond, batch_size=1000)
@@ -252,8 +256,8 @@ def main(cfg: DictConfig) -> None:
                 'FFF': transformed,
                 'BdTransfer': right_bd_dec
             }, flow4flow_dir, f'{con.item():.2f}')
-            plot_data(transformed, debug_dir / f'transformed_density_{tensor_to_str(right_cond)}.png')
-            plot_data(right_bd_dec, debug_dir / f'bd_transformed_density_{tensor_to_str(right_cond)}.png')
+            plot_data(transformed, debug_dir / f'transformed_density_{tensor_to_str(right_cond[0])}.png')
+            plot_data(right_bd_dec, debug_dir / f'bd_transformed_density_{tensor_to_str(right_cond[0])}.png')
 
             ##dump data
             df = dump_to_df(left_data, left_cond, right_cond * torch.ones_like(left_cond), transformed, left_bd_enc,
@@ -261,7 +265,7 @@ def main(cfg: DictConfig) -> None:
                             col_names=['input_x', 'input_y', 'left_cond', 'right_cond',
                                        'transformed_x', 'transformed_y', 'left_enc_x', 'left_enc_y',
                                        'base_transfer_x', 'base_transfer_y'])
-            df.to_hdf(flow4flow_dir / 'eval_data_conditional.h5', f'f4f_{con:.2f}'.replace('.', '_'))
+            df.to_hdf(flow4flow_dir / 'eval_data_conditional.h5', f'f4f_{con.item():.2f}'.replace('.', '_'))
 
 
 if __name__ == "__main__":

@@ -34,21 +34,20 @@ def main():
 
     left_data = [
         # "'concentricrings'",
-        # "'fourcircles'",
-        "'crescentcubed'",
-        # "'checkerboard'",
+        "'fourcircles'",
+        # "'crescentcubed'",
+        "'checkerboard'",
         # "'star'",
     ]
     right_data = [
-        "'crescent'",
-        # "'checkerboard'",
-        # "'spirals'",
+        # "'crescent'",
+        "'checkerboard'",
+        "'spirals'",
         # "'star'",
         # "'eightstar'",
     ]
     f4f_dir = [
         "'alternate'",
-        "'inverse'",
     ]
 
     penalty = ["None"]
@@ -57,16 +56,20 @@ def main():
     # penalty_weight = ["1", "10", "100"]
 
     hpo.add_opt('general.n_points', [int(1e5)], True)
-    hpo.add_opt('base_dist.left.nepochs', [2], True)
-    hpo.add_opt('base_dist.right.nepochs', [2], True)
+    hpo.add_opt('base_dist.left.nepochs', [10], True)
+    hpo.add_opt('base_dist.right.nepochs', [10], True)
 
-    top_dir = '/home/users/k/kleins/scratch/flows4flows/joint_cond_test_crescents/final_r2_0'
-    hpo.add_opt('base_dist.left.load_path',
-                [f'{top_dir}/base_left/epoch_9_valloss_2.172.pt'],
-                True)
-    hpo.add_opt('base_dist.right.load_path',
-                [f'{top_dir}/base_right/epoch_9_valloss_1.148.pt'],
-                True)
+    # Crescent debugging settings
+    # top_dir = '/home/users/k/kleins/scratch/flows4flows/joint_cond_test_crescents/final_r2_0'
+    # hpo.add_opt('base_dist.left.load_path',
+    #             [f'{top_dir}/base_left/epoch_9_valloss_2.172.pt'],
+    #             True)
+    # hpo.add_opt('base_dist.right.load_path',
+    #             [f'{top_dir}/base_right/epoch_9_valloss_1.148.pt'],
+    #             True)
+    # hpo.add_opt('top_transformer.load_path',
+    #             [f'/home/users/k/kleins/scratch/flows4flows/joint_cond_crescents_fixed/debug_short_1/f4f/epoch_9.pt'],
+    #             True)
 
     hpo.add_opt('top_transformer.nepochs', [10], True)
     hpo.add_opt('base_dist.plot', [1], True)

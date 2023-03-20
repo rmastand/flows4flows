@@ -82,3 +82,11 @@ class ConditionalDataToTarget(UnconditionalDataToData):
         # assuming data is of form (data,condition)
         data1, data2 = [shuffle_tensor(data) for data in (self.data1, self.data2)]
         return PairedList((*data1, data2[1]), (*data2, data1[1]))
+
+
+class PairedConditionalDataToTarget(ConditionalDataToTarget):
+
+    def paired(self):
+        # assuming data is of form (data,condition)
+        data1, data2 = [shuffle_tensor(data) for data in (self.data1, self.data2)]
+        return PairedList((*data1, data1[1]), (*data2, data2[1]))

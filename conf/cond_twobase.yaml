@@ -4,7 +4,7 @@ output:
 
 general:
   data_dim: 2
-  n_points: 1e4
+  n_points: 1e3
   ncond: 1
   condition: rotation
 
