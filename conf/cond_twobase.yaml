@@ -1,21 +1,19 @@
 output:
-  save_dir: /srv/beegfs/scratch/groups/rodem/flows4flows/
+  save_dir: ./flows4flows/
   name: test
 
 general:
-  data_dim: 2
-  n_points: 1e3
+  data_dim: 5
+  ncond_base: 1
   ncond: 1
-  condition: rotation
 
 base_dist:
   plot: False
+  batch_size: 128
   left:
-    data: crescent
     load_path: None
-    batch_size: 128
     lr: 1e-3
-    nepochs: 2
+    nepochs: 20
     gclip: 5
     nstack: 4
     nblocks: 2
@@ -26,27 +24,12 @@ base_dist:
     coupling_width: 32
     coupling_depth: 2
 
-  right:
-    data: crescentcubed
-    load_path: None
-    batch_size: 128
-    lr: 1e-3
-    nepochs: 2
-    gclip: 5
-    nstack: 4
-    nblocks: 2
-    nnodes: 128
-    nbins: 8
-    activation: relu
-    coupling: False
-    coupling_width: 32
-    coupling_depth: 2
 
 top_transformer:
   load_path: None
   batch_size: 128
   lr: 1e-4
-  nepochs: 1
+  nepochs: 20
   gclip: 5
   nstack: 4
   nblocks: 2
@@ -59,7 +42,7 @@ top_transformer:
   penalty: None
   penalty_weight: 1
   anneal: 1
-  direction: alternate
+  direction: forward
 
 defaults:
   - _self_
