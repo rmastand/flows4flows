@@ -18,6 +18,8 @@ from nflows.utils import tensor2numpy
 import pandas as pd
 import numpy as np
 
+from dense import dense_net
+
 # from plot import plot_training
 import matplotlib.pyplot as plt
 
@@ -154,6 +156,40 @@ def spline_inn(inp_dim, nodes=128, num_blocks=2, num_stack=3, tail_bound=3.5, ta
                                                                                num_bins=num_bins,
                                                                                tails=tails, activation=activation,
                                                                                context_features=context_features)]
+        if lu:
+            transform_list += [transforms.LULinear(inp_dim)]
+        else:
+            transform_list += [transforms.ReversePermutation(inp_dim)]
+
+    if not (flow_for_flow and (num_stack % 2 == 0)):
+        # If the above conditions are satisfied then you want to permute back to the original ordering such that the
+        # output features line up with their original ordering.
+        transform_list = transform_list[:-1]
+
+    return transforms.CompositeTransform(transform_list)
+
+# CHANGED
+def coupling_flow(inp_dim, nodes=128, num_blocks=2, num_stack=3, tail_bound=3.5, tails='linear', activation=F.relu, lu=0,
+               num_bins=10, context_features=None, flow_for_flow=False):
+    
+    # first make the mask
+    n_mask = int(np.ceil(inp_dim / 2))
+    mx = [1] * n_mask + [0] * int(inp_dim - n_mask)
+
+    # then make the maker
+    # this has to be an nn.module that takes as first arg the input dim and second the output dim
+    def maker(input_dim, output_dim):
+        return dense_net(input_dim, output_dim, layers=[nodes] * num_blocks, context_features=context_features)
+    
+
+    transform_list = []
+    for i in range(num_stack):
+        transform_list += [
+            transforms.PiecewiseRationalQuadraticCouplingTransform(mx, maker, 
+                                                    tail_bound = tail_bound, 
+                                                    tails = tails, 
+                                                    num_bins = num_bins)  ]
+        
         if lu:
             transform_list += [transforms.LULinear(inp_dim)]
         else:
@@ -340,10 +376,12 @@ def tensor_to_str(tensor):
 
 def dump_to_df(*args, col_names=None):
     data = [tensor2numpy(d) for d in args]
-    if len(np.unique(lens := [len(d) for d in data])) != 1:
+    lens = [len(d) for d in data]
+    shapes = [d.shape[:-1] for d in data]
+    if len(np.unique(lens)) != 1:
         print(f"Arrays not all same length, received f{lens}")
         exit(50)
-    elif len(np.unique(shapes := [d.shape[:-1] for d in data])) != 1:
+    elif len(np.unique(shapes)) != 1:
         print(f"Arrays not all same shape up until last axis, received f{shapes}")
         exit(51)
     data = np.concatenate(data, axis=-1)
