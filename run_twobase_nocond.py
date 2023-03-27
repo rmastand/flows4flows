@@ -82,7 +82,7 @@ def main(cfg: DictConfig) -> None:
         OmegaConf.save(config=cfg, f=file)
 
     # Set device
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 
     # Get training data
     n_points = int(cfg.general.n_points)
@@ -100,6 +100,8 @@ def main(cfg: DictConfig) -> None:
 
     plot_data(get_data(cfg.base_dist.left.data, n_points).data,
               outputpath / f'base_density_left_data.png')
+    plot_data(get_data(cfg.base_dist.right.data, n_points).data,
+              outputpath / f'base_density_right_data.png')
 
     # Train base1
     base_flow_l, base_flow_r = [BaseFlow(spline_inn(cfg.general.data_dim,

@@ -1,0 +1,49 @@
+output:
+  save_dir: ./flows4flows/
+  name: test
+
+general:
+  data_dim: 5
+  ncond_base: 1
+  ncond: 1
+
+base_dist:
+  plot: False
+  batch_size: 128
+  left:
+    load_path: None
+    lr: 1e-4
+    nepochs: 50
+    gclip: 5
+    nstack: 1
+    nblocks: 15
+    nnodes: 128
+    nbins: 10
+    activation: relu
+    coupling: False
+    coupling_width: 32
+    coupling_depth: 2
+  right:
+    load_path: None
+    lr: 1e-4
+    nepochs: 50
+    gclip: 5
+    nstack: 1
+    nblocks: 15
+    nnodes: 128
+    nbins: 10
+    activation: relu
+    coupling: False
+    coupling_width: 32
+    coupling_depth: 2
+
+
+defaults:
+  - _self_
+  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled
+
+hydra:
+  output_subdir: null
+  run:
+    dir: .

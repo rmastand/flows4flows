@@ -18,6 +18,7 @@ from ffflows.data.dist_to_dist import PairedConditionalDataToTarget
 # CHANGED: new science dataset
 from ffflows.data.conditional_plane import ScienceDataset
 
+
 import numpy as np
 
 np.random.seed(42)
@@ -28,9 +29,8 @@ def train_base(*args, **kwargs):
     return train(*args, **kwargs)
 
 
-# CHANGED: rand_perm_target from True -> False
 def train_f4f_forward(*args, **kwargs):
-    return train(*args, **kwargs, rand_perm_target=False, inverse=False)
+    return train(*args, **kwargs, rand_perm_target=True, inverse=False)
 
 
 def train_f4f_inverse(*args, **kwargs):
@@ -82,7 +82,7 @@ def get_datasets(cfg):
             [cfg.base_dist.left, cfg.base_dist.right]]
 
 
-@hydra.main(version_base=None, config_path="conf/", config_name="cond_twobase")
+@hydra.main(version_base=None, config_path="conf/", config_name="cond_science")
 def main(cfg: DictConfig) -> None:
     print("Configuring job with following options")
     print(OmegaConf.to_yaml(cfg))
@@ -96,10 +96,10 @@ def main(cfg: DictConfig) -> None:
         exit(42)
 
     # Set device
-    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 
-    # Get training data
     # CHANGED: LHCO data
+    ncond_base = None if cfg.general.ncond == 0 else cfg.general.ncond
     train_sim_data = torch.from_numpy(np.load("LHCO_data/train_sim_data.npy")).to(torch.float32)
     val_sim_data = torch.from_numpy(np.load("LHCO_data/val_sim_data.npy")).to(torch.float32)
     train_dat_data = torch.from_numpy(np.load("LHCO_data/train_dat_data.npy")).to(torch.float32)
@@ -110,54 +110,34 @@ def main(cfg: DictConfig) -> None:
     train_dat_cont = torch.from_numpy(np.load("LHCO_data/train_dat_cont.npy").reshape(-1, 1)).to(torch.float32)
     val_dat_cont = torch.from_numpy(np.load("LHCO_data/val_dat_cont.npy").reshape(-1, 1)).to(torch.float32)
     
-    train_base_data = DataLoader(dataset=ScienceDataset(train_sim_data, train_sim_cont),
-        batch_size=cfg.base_dist.batch_size,shuffle=True)
+    train_sim_l_data = DataLoader(dataset=ScienceDataset(train_sim_data, train_sim_cont),
+        batch_size=cfg.base_dist.left.batch_size,shuffle=True)
     
-    val_base_data = DataLoader(dataset=ScienceDataset(val_sim_data, val_sim_cont), batch_size=1000, shuffle = False)
+    val_sim_l_data = DataLoader(dataset=ScienceDataset(val_sim_data, val_sim_cont), batch_size=1000, shuffle = False)
     
-    train_target_data = DataLoader(dataset=ScienceDataset(train_dat_data, train_dat_cont),
-        batch_size=cfg.top_transformer.batch_size,shuffle=True)
+    train_dat_r_data = DataLoader(dataset=ScienceDataset(train_dat_data, train_dat_cont),
+        batch_size=cfg.base_dist.right.batch_size,shuffle=True)
     
-    val_target_data = DataLoader(dataset=ScienceDataset(val_dat_data, val_dat_cont), batch_size=1000, shuffle = False)
+    val_dat_r_data = DataLoader(dataset=ScienceDataset(val_dat_data, val_dat_cont), batch_size=1000, shuffle = False)
     
-    ncond_base = None if cfg.general.ncond == 0 else cfg.general.ncond
-    """
-    n_points = int(cfg.general.n_points)
-    condition_type = cfg.general.condition
-    ncond_base = None if cfg.general.ncond == 0 else cfg.general.ncond
-    base_data_l, base_data_r = [DataLoader(dataset=get_conditional_data(condition_type, bd_conf.data, n_points),
-                                           batch_size=bd_conf.batch_size, shuffle=True) \
-                                for bd_conf in [cfg.base_dist.left, cfg.base_dist.right]]
-    val_base_data_l, val_base_data_r = [
-        DataLoader(dataset=get_conditional_data(condition_type, bd_conf.data, n_points),
-                   batch_size=1000, shuffle=True) \
-        for bd_conf in [cfg.base_dist.left, cfg.base_dist.right]]
-
-    plot_data(get_data(cfg.base_dist.left.data, n_points).data,
-              outputpath / f'base_density_left_data.png')
-    """
-
     # Train base
-    # CHANGED: only training the left flow
-    #base_flow_l, base_flow_r = [BaseFlow(spline_inn(cfg.general.data_dim,
-    base_flow_l = BaseFlow(spline_inn(cfg.general.data_dim,
-                                                    nodes=cfg.base_dist.left.nnodes,
-                                                    num_blocks=cfg.base_dist.left.nblocks,
-                                                    num_stack=cfg.base_dist.left.nstack,
+    base_flow_l, base_flow_r = [BaseFlow(spline_inn(cfg.general.data_dim,
+                                                    nodes=bd_conf.nnodes,
+                                                    num_blocks=bd_conf.nblocks,
+                                                    num_stack=bd_conf.nstack,
                                                     tail_bound=4.0,
-                                                    activation=get_activation(cfg.base_dist.left.activation),
-                                                    num_bins=cfg.base_dist.left.nbins,
+                                                    activation=get_activation(bd_conf.activation),
+                                                    num_bins=bd_conf.nbins,
                                                     context_features=ncond_base
                                                     ),
-                                         StandardNormal([cfg.general.data_dim]))
-    #                                    ) for bd_conf in [cfg.base_dist.left, cfg.base_dist.right]
-                                       
-                        
-    for label, base_data, val_base_data, bd_conf, base_flow in zip(['left'],#, 'right'],
-                                                                   [train_base_data],#, base_data_r],
-                                                                   [val_base_data],#, val_base_data_r],
-                                                                   [cfg.base_dist.left],#, cfg.base_dist.right],
-                                                                   [base_flow_l]):#, base_flow_r]):
+                                         StandardNormal([cfg.general.data_dim])
+                                         ) for bd_conf in [cfg.base_dist.left, cfg.base_dist.right]
+                                ]
+    for label, base_data, val_base_data, bd_conf, base_flow in zip(['left', 'right'],
+                                                                   [train_sim_l_data, train_dat_r_data],
+                                                                   [val_sim_l_data, val_dat_r_data],
+                                                                   [cfg.base_dist.left, cfg.base_dist.right],
+                                                                   [base_flow_l, base_flow_r]):
 
         if pathlib.Path(bd_conf.load_path).is_file():
             print(f"Loading base_{label} from model: {bd_conf.load_path}")
@@ -170,34 +150,8 @@ def main(cfg: DictConfig) -> None:
 
         set_trainable(base_flow, False)
 
-        # plot_data(base_flow.sample(int(1e5)), outputpath / f'base_density_{label}_samples.png')
-        """
-        if cfg.base_dist.plot:
-            base_flow.to(device)
-
-            nevalpoints = 6
-            bd_samples = []
-            bd_path = outputpath / f'base_{label}' / 'evaluation'
-            bd_path.mkdir(exist_ok=True, parents=True)
-            with torch.no_grad():
-                for right_cond in (
-                        evals := get_conditional_data(condition_type, bd_conf.data, n_points).get_default_eval(
-                            nevalpoints)):
-                    nsamples = int(1e5)
-                    right_cond = torch.Tensor([right_cond]).view(1, -1).to(device)
-                    plot_data(
-                        sampled := base_flow.sample(nsamples, context=right_cond, batch_size=int(1e5)).view(-1, 2),
-                        bd_path / f'base_density_{tensor_to_str(right_cond)}.png'
-                    )
-                    bd_samples.append(sampled)
-            df = dump_to_df(*bd_samples,
-                            col_names=[f'cond_{ev:.2f}_{coord}'.replace('.', '_') for ev in evals for coord in
-                                       ['x', 'y']])
-            df.to_hdf(bd_path / 'eval_data.h5', f'base_dist')
-        """
 
     # Train Flow4Flow
-    # CHANGED: only 1 base                                                        
     f4flow = get_flow4flow('discretebasecondition',
                            spline_inn(cfg.general.data_dim,
                                       nodes=cfg.top_transformer.nnodes,
@@ -209,13 +163,18 @@ def main(cfg: DictConfig) -> None:
                                       context_features=ncond_base,
                                       flow_for_flow=True
                                       ),
-                           distribution_right=base_flow_l)#,
-                         #  distribution_left=base_flow_l)
+                           distribution_right=base_flow_r,
+                           distribution_left=base_flow_l)
 
     set_penalty(f4flow, cfg.top_transformer.penalty, cfg.top_transformer.penalty_weight, cfg.top_transformer.anneal)
+    
+    set1 = [ScienceDataset(train_sim_data, train_sim_cont), ScienceDataset(train_dat_data, train_dat_cont)]
+    set2 = [ScienceDataset(val_sim_data, val_sim_cont), ScienceDataset(val_dat_data, val_dat_cont)]
 
-    #train_data = PairedConditionalDataToTarget(*get_datasets(cfg))
-    #val_data = PairedConditionalDataToTarget(*get_datasets(cfg))
+    train_data = PairedConditionalDataToTarget(*set1)
+    val_data = PairedConditionalDataToTarget(*set2)
+
+
 
     if pathlib.Path(cfg.top_transformer.load_path).is_file():
         print(f"Loading Flow4Flow from model: {cfg.top_transformer.load_path}")
@@ -238,14 +197,11 @@ def main(cfg: DictConfig) -> None:
                             outputpath, name='f4f', device=device, gclip=cfg.top_transformer.gclip)
 
     else:
-    # CHANGED: dataset                                                              
         if (direction == 'forward' or direction == 'both'):
             print("Training Flow4Flow model forwards")
             train_f4f_forward(f4flow,
-                              #DataLoader(train_data.left(), batch_size=cfg.top_transformer.batch_size, shuffle=True),
-                              #DataLoader(val_data.left(), batch_size=1000),
-                              train_target_data,
-                              val_target_data, 
+                              DataLoader(train_data.left(), batch_size=cfg.top_transformer.batch_size, shuffle=True),
+                              DataLoader(val_data.left(), batch_size=1000),
                               cfg.top_transformer.nepochs, cfg.top_transformer.lr, ncond_base,
                               outputpath, name='f4f_fwd', device=device, gclip=cfg.top_transformer.gclip)
 
@@ -256,52 +212,33 @@ def main(cfg: DictConfig) -> None:
                               DataLoader(val_data.right(), batch_size=1000),
                               cfg.top_transformer.nepochs, cfg.top_transformer.lr, ncond_base,
                               outputpath, name='f4f_inv', device=device, gclip=cfg.top_transformer.gclip)
-    """
+
     with torch.no_grad():
         f4flow.to(device)
 
-        # Colored/conditional plots
-        test_data = get_conditional_data(condition_type, cfg.base_dist.left.data, n_points)
-
-        # This will return a set of conditions to map to, and ensure test_data contains points from the same condition
-        test_points = test_data.get_default_eval(6)
+       
         flow4flow_dir = outputpath / 'flow4flow_plots'
         flow4flow_dir.mkdir(exist_ok=True, parents=True)
         debug_dir = flow4flow_dir / 'debug'
         debug_dir.mkdir(exist_ok=True, parents=True)
-        for con in test_points:
-            # Handle the broadcasting
-            # TODO this isn't generic across the different conditional datasets
-            con *= test_data.max_angle
-            left_data, left_cond = test_data._get_conditional(con.item())
-            left_data = torch.Tensor(left_data).to(device)
-            left_cond = (left_cond * torch.ones(len(left_data), 1)).to(device)
-            right_cond = left_cond
+       
 
-            # Transform the data
-            transformed, _ = f4flow.batch_transform(left_data, left_cond, right_cond, batch_size=1000)
-            # Plot the output densities
-            plot_data(transformed, flow4flow_dir / f'flow_for_flow_{tensor_to_str(con)}.png')
-            # Get the transformation that results from going via the base distributions
-            left_bd_enc = f4flow.base_flow_left.transform_to_noise(left_data, left_cond)
-            right_bd_dec, _ = f4flow.base_flow_right._transform.inverse(left_bd_enc, right_cond.view(-1, 1))
-            # Plot how each point is shifted
-            plot_arrays({
-                'Input Data': left_data,
-                'FFF': transformed,
-                'BdTransfer': right_bd_dec
-            }, flow4flow_dir, f'{con.item():.2f}')
-            plot_data(transformed, debug_dir / f'transformed_density_{tensor_to_str(right_cond[0])}.png')
-            plot_data(right_bd_dec, debug_dir / f'bd_transformed_density_{tensor_to_str(right_cond[0])}.png')
+        # Transform the data
+        transformed, _ = f4flow.batch_transform(val_sim_data, val_sim_cond, val_dat_cond, batch_size=1000)
+        # Plot the output densities
+        #plot_data(transformed, flow4flow_dir / f'flow_for_flow_{tensor_to_str(con)}.png')
+        # Get the transformation that results from going via the base distributions
+        left_bd_enc = f4flow.base_flow_left.transform_to_noise(val_sim_data, val_sim_cond)
+        right_bd_dec, _ = f4flow.base_flow_right._transform.inverse(left_bd_enc, val_dat_cond.view(-1, 1))
+        
+        ##dump data
+        df = dump_to_df(left_data, left_cond, right_cond * torch.ones_like(left_cond), transformed, left_bd_enc,
+                        right_bd_dec,
+                        col_names=['input_x', 'input_y', 'left_cond', 'right_cond',
+                                   'transformed_x', 'transformed_y', 'left_enc_x', 'left_enc_y',
+                                   'base_transfer_x', 'base_transfer_y'])
+        df.to_hdf(flow4flow_dir / 'eval_data_conditional.h5', f'f4f')
 
-            ##dump data
-            df = dump_to_df(left_data, left_cond, right_cond * torch.ones_like(left_cond), transformed, left_bd_enc,
-                            right_bd_dec,
-                            col_names=['input_x', 'input_y', 'left_cond', 'right_cond',
-                                       'transformed_x', 'transformed_y', 'left_enc_x', 'left_enc_y',
-                                       'base_transfer_x', 'base_transfer_y'])
-            df.to_hdf(flow4flow_dir / 'eval_data_conditional.h5', f'f4f_{con.item():.2f}'.replace('.', '_'))
 
-    """
 if __name__ == "__main__":
     main()

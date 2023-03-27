@@ -93,7 +93,7 @@ def main(cfg: DictConfig) -> None:
         exit(42)
 
     # Set device
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
     # Get training data
     n_points = int(cfg.general.n_points)
@@ -109,6 +109,8 @@ def main(cfg: DictConfig) -> None:
 
     plot_data(get_data(cfg.base_dist.left.data, n_points).data,
               outputpath / f'base_density_left_data.png')
+    plot_data(get_data(cfg.base_dist.right.data, n_points).data,
+              outputpath / f'base_density_right_data.png')
 
     # Train base
     base_flow_l, base_flow_r = [BaseFlow(spline_inn(cfg.general.data_dim,
@@ -140,7 +142,6 @@ def main(cfg: DictConfig) -> None:
 
         set_trainable(base_flow, False)
 
-        # plot_data(base_flow.sample(int(1e5)), outputpath / f'base_density_{label}_samples.png')
 
         if cfg.base_dist.plot:
             base_flow.to(device)
@@ -184,6 +185,9 @@ def main(cfg: DictConfig) -> None:
 
     train_data = PairedConditionalDataToTarget(*get_datasets(cfg))
     val_data = PairedConditionalDataToTarget(*get_datasets(cfg))
+    print(train_data.data1.shape)
+    print(train_data.data2.shape)
+
 
     if pathlib.Path(cfg.top_transformer.load_path).is_file():
         print(f"Loading Flow4Flow from model: {cfg.top_transformer.load_path}")

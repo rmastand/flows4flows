@@ -3,13 +3,12 @@ output:
   name: writeup
 
 general:
-  data_dim: 2
-  n_points: 1e5
-  ncond: 0
-
+  data_dim: 5
+  ncond: 1
+  
 base_dist:
+  plot: True
   left:
-    data: Ring
     load_path: None
     batch_size: 128
     lr: 1e-4
@@ -22,7 +21,6 @@ base_dist:
     activation: relu
 
   right:
-    data: Ring
     load_path: None
     batch_size: 128
     lr: 1e-4
@@ -39,9 +37,6 @@ top_transformer:
   batch_size: 128
   lr: 1e-4
   nepochs: 20
-  flow4flow: discretebase
-  direction: alternate
-  iteration_steps: 5
   gclip: 5
   nstack: 4
   nblocks: 2
@@ -51,6 +46,7 @@ top_transformer:
   penalty: None
   penalty_weight: 1
   anneal: 1
+  direction: alternate
 
 defaults:
   - _self_
