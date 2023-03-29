@@ -12,7 +12,7 @@ base_dist:
   plot: True
   left:
     data: checkerboard
-    load_path: None
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/checkerboard_to_circles_cond_1e6/base_left/epoch_31.pt
     batch_size: 128
     lr: 1e-4
     nepochs: 32
@@ -25,7 +25,7 @@ base_dist:
 
   right:
     data: fourcircles
-    load_path: None
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/checkerboard_to_circles_cond_1e6/base_right/epoch_31.pt
     batch_size: 128
     lr: 1e-4
     nepochs: 32
