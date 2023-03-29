@@ -110,8 +110,7 @@ def main(cfg: DictConfig) -> None:
     train_dat_cont = torch.from_numpy(np.load("LHCO_data/train_dat_cont.npy").reshape(-1, 1)).to(torch.float32)
     val_dat_cont = torch.from_numpy(np.load("LHCO_data/val_dat_cont.npy").reshape(-1, 1)).to(torch.float32)
     
-    train_sim_l_data = DataLoader(dataset=ScienceDataset(train_sim_data, train_sim_cont),
-        batch_size=cfg.base_dist.left.batch_size,shuffle=True)
+    train_sim_l_data = DataLoader(dataset=ScienceDataset(train_sim_data, train_sim_cont), batch_size=cfg.base_dist.left.batch_size,shuffle=True)
     
     val_sim_l_data = DataLoader(dataset=ScienceDataset(val_sim_data, val_sim_cont), batch_size=1000, shuffle = False)
     
@@ -173,7 +172,7 @@ def main(cfg: DictConfig) -> None:
 
     train_data = PairedConditionalDataToTarget(*set1)
     val_data = PairedConditionalDataToTarget(*set2)
-
+        
 
 
     if pathlib.Path(cfg.top_transformer.load_path).is_file():
@@ -189,10 +188,32 @@ def main(cfg: DictConfig) -> None:
                           name='f4f', device=device, gclip=cfg.top_transformer.gclip)
 
     elif (direction == 'alternate'):
+        
+        # then we have to be hacky
+        # because the sim dataset is larger than the dat dataset
+        # and they need to be the same size
+        n_total_train = train_sim_cont.shape[0]
+        n_choose_train = train_dat_cont.shape[0]
+        n_total_val = val_sim_cont.shape[0]
+        n_choose_val = val_dat_cont.shape[0]
+        choose_indices_train = np.random.choice(range(n_total_train), size = n_choose_train, replace = False)
+        choose_indices_val = np.random.choice(range(n_total_val), size = n_choose_val, replace = False)
+        
+        select_train_sim_data = train_sim_data[choose_indices_train]
+        select_train_sim_cont = train_sim_cont[choose_indices_train]
+        select_val_sim_data = val_sim_data[choose_indices_val]
+        select_val_sim_cont = val_sim_cont[choose_indices_val]
+
+        loc_set1 = [ScienceDataset(select_train_sim_data, select_train_sim_cont), ScienceDataset(train_dat_data, train_dat_cont)]
+        loc_set2 = [ScienceDataset(select_val_sim_data, select_val_sim_cont), ScienceDataset(val_dat_data, val_dat_cont)]
+
+        loc_train_data = PairedConditionalDataToTarget(*loc_set1)
+        loc_val_data = PairedConditionalDataToTarget(*loc_set2)
+        
         print("Training Flow4Flow model alternating every batch")
-        train_batch_iterate(f4flow, DataLoader(train_data.paired(), batch_size=cfg.top_transformer.batch_size,
+        train_batch_iterate(f4flow, DataLoader(loc_train_data.paired(), batch_size=cfg.top_transformer.batch_size,
                                                shuffle=True),
-                            DataLoader(val_data.paired(), batch_size=cfg.top_transformer.batch_size),
+                            DataLoader(loc_val_data.paired(), batch_size=cfg.top_transformer.batch_size),
                             cfg.top_transformer.nepochs, cfg.top_transformer.lr, ncond_base,
                             outputpath, name='f4f', device=device, gclip=cfg.top_transformer.gclip)
 
@@ -224,17 +245,17 @@ def main(cfg: DictConfig) -> None:
        
 
         # Transform the data
-        transformed, _ = f4flow.batch_transform(val_sim_data, val_sim_cond, val_dat_cond, batch_size=1000)
+        transformed, _ = f4flow.batch_transform(val_sim_data, val_sim_cont, val_dat_cont, batch_size=1000)
         # Plot the output densities
         #plot_data(transformed, flow4flow_dir / f'flow_for_flow_{tensor_to_str(con)}.png')
         # Get the transformation that results from going via the base distributions
-        left_bd_enc = f4flow.base_flow_left.transform_to_noise(val_sim_data, val_sim_cond)
-        right_bd_dec, _ = f4flow.base_flow_right._transform.inverse(left_bd_enc, val_dat_cond.view(-1, 1))
+        left_bd_enc = f4flow.base_flow_left.transform_to_noise(val_sim_data, val_sim_cont)
+        right_bd_dec, _ = f4flow.base_flow_right._transform.inverse(left_bd_enc, val_dat_cont.view(-1, 1))
         
         ##dump data
-        df = dump_to_df(left_data, left_cond, right_cond * torch.ones_like(left_cond), transformed, left_bd_enc,
+        df = dump_to_df(val_sim_data, val_sim_cont, val_dat_data, val_dat_cont, transformed, left_bd_enc,
                         right_bd_dec,
-                        col_names=['input_x', 'input_y', 'left_cond', 'right_cond',
+                        col_names=['val_sim_data', 'val_sim_cont', 'val_dat_data', 'val_dat_cont',
                                    'transformed_x', 'transformed_y', 'left_enc_x', 'left_enc_y',
                                    'base_transfer_x', 'base_transfer_y'])
         df.to_hdf(flow4flow_dir / 'eval_data_conditional.h5', f'f4f')

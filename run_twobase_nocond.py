@@ -82,7 +82,7 @@ def main(cfg: DictConfig) -> None:
         OmegaConf.save(config=cfg, f=file)
 
     # Set device
-    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
     # Get training data
     n_points = int(cfg.general.n_points)
@@ -112,7 +112,7 @@ def main(cfg: DictConfig) -> None:
                                                     activation=get_activation(bd_conf.activation),
                                                     num_bins=bd_conf.nbins,
                                                     context_features=ncond_base
-                                                    ),
+                                                   ),
                                          StandardNormal([cfg.general.data_dim])
                                          ) for bd_conf in [cfg.base_dist.left, cfg.base_dist.right]
                                 ]
@@ -137,6 +137,7 @@ def main(cfg: DictConfig) -> None:
         plot_data(base_flow.sample(int(1e5)), outputpath / f'base_density_{label}_samples.png')
 
     # Train Flow4Flow
+    print(f"Identity init: {cfg.top_transformer.identity_init}")
     f4flow = get_flow4flow(cfg.top_transformer.flow4flow,
                            spline_inn(cfg.general.data_dim,
                                       nodes=cfg.top_transformer.nnodes,
@@ -146,7 +147,8 @@ def main(cfg: DictConfig) -> None:
                                       activation=get_activation(cfg.top_transformer.activation),
                                       num_bins=cfg.top_transformer.nbins,
                                       context_features=ncond_f4f,
-                                      flow_for_flow=True
+                                      flow_for_flow=True,
+                                      identity_init = cfg.top_transformer.identity_init
                                       ),
                            distribution_right=base_flow_r,
                            distribution_left=base_flow_l)

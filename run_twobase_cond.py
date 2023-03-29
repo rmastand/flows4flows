@@ -42,6 +42,8 @@ def train_f4f_iterate(model, train_dataset, val_dataset, batch_size,
     val_loss_fwd = torch.zeros(n_epochs)
     loss_inv = torch.zeros(n_epochs)
     val_loss_inv = torch.zeros(n_epochs)
+    
+    
 
     for step in range((steps := n_epochs // iteration_steps)):
         print(f"Iteration {step + 1}/{steps}")
@@ -185,8 +187,6 @@ def main(cfg: DictConfig) -> None:
 
     train_data = PairedConditionalDataToTarget(*get_datasets(cfg))
     val_data = PairedConditionalDataToTarget(*get_datasets(cfg))
-    print(train_data.data1.shape)
-    print(train_data.data2.shape)
 
 
     if pathlib.Path(cfg.top_transformer.load_path).is_file():

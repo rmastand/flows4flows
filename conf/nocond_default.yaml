@@ -10,7 +10,7 @@ general:
 base_dist:
   left:
     data: Ring
-    load_path: None
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/ring_star_nocond_f4f/base_left/epoch_19.pt
     batch_size: 128
     lr: 1e-4
     nepochs: 20
@@ -22,8 +22,8 @@ base_dist:
     activation: relu
 
   right:
-    data: Ring
-    load_path: None
+    data: Star
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/ring_star_nocond_f4f/base_right/epoch_19.pt
     batch_size: 128
     lr: 1e-4
     nepochs: 20
@@ -48,9 +48,10 @@ top_transformer:
   nnodes: 128
   nbins: 8
   activation: relu
-  penalty: None
-  penalty_weight: 1
-  anneal: 1
+  penalty: l1
+  penalty_weight: .01
+  anneal: 0
+  identity_init: 0
 
 defaults:
   - _self_

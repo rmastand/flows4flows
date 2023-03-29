@@ -9,10 +9,10 @@ general:
 base_dist:
   plot: True
   left:
-    load_path: None
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/science/base_left/epoch_31.pt
     batch_size: 128
     lr: 1e-4
-    nepochs: 20
+    nepochs: 32
     gclip: 5
     nstack: 4
     nblocks: 2
@@ -21,10 +21,10 @@ base_dist:
     activation: relu
 
   right:
-    load_path: None
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/science/base_right/epoch_31.pt
     batch_size: 128
     lr: 1e-4
-    nepochs: 20
+    nepochs: 32
     gclip: 5
     nstack: 4
     nblocks: 2
@@ -36,7 +36,7 @@ top_transformer:
   load_path: None
   batch_size: 128
   lr: 1e-4
-  nepochs: 20
+  nepochs: 32
   gclip: 5
   nstack: 4
   nblocks: 2

@@ -4,7 +4,7 @@ output:
 
 general:
   data_dim: 2
-  n_points: 1e5
+  n_points: 1e6
   ncond: 1
   condition: rotation
 
@@ -15,7 +15,7 @@ base_dist:
     load_path: None
     batch_size: 128
     lr: 1e-4
-    nepochs: 20
+    nepochs: 32
     gclip: 5
     nstack: 4
     nblocks: 2
@@ -28,7 +28,7 @@ base_dist:
     load_path: None
     batch_size: 128
     lr: 1e-4
-    nepochs: 20
+    nepochs: 32
     gclip: 5
     nstack: 4
     nblocks: 2
@@ -40,7 +40,7 @@ top_transformer:
   load_path: None
   batch_size: 128
   lr: 1e-4
-  nepochs: 20
+  nepochs: 12
   gclip: 5
   nstack: 4
   nblocks: 2
