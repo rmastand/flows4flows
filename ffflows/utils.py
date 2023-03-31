@@ -11,6 +11,7 @@ from ffflows.models import DeltaFlowForFlow, ConcatFlowForFlow, DiscreteBaseFlow
 from ffflows.data.plane import ConcentricRings, FourCircles, CheckerboardDataset, TwoSpiralsDataset, Star, \
     Anulus, CrescentDataset, CrescentCubedDataset
 from ffflows.data.conditional_plane import RotatedData, RadialScale, ElipseShift
+from ffflows.identity_init_transforms import MaskedPiecewiseRationalQuadraticAutoregressiveTransformIdentInit
 
 from nflows import transforms
 from nflows.utils import tensor2numpy
@@ -146,16 +147,26 @@ def get_flow4flow(name, *args, **kwargs):
 
 
 def spline_inn(inp_dim, nodes=128, num_blocks=2, num_stack=3, tail_bound=3.5, tails='linear', activation=F.relu, lu=0,
-               num_bins=10, context_features=None, flow_for_flow=False):
+               num_bins=10, context_features=None, flow_for_flow=False, identity_init = False):
     transform_list = []
     for i in range(num_stack):
-        transform_list += [
-            transforms.MaskedPiecewiseRationalQuadraticAutoregressiveTransform(inp_dim, nodes,
-                                                                               num_blocks=num_blocks,
-                                                                               tail_bound=tail_bound,
-                                                                               num_bins=num_bins,
-                                                                               tails=tails, activation=activation,
-                                                                               context_features=context_features)]
+        if not identity_init:
+            transform_list += [
+                transforms.MaskedPiecewiseRationalQuadraticAutoregressiveTransform(inp_dim, nodes,
+                                                                                   num_blocks=num_blocks,
+                                                                                   tail_bound=tail_bound,
+                                                                                   num_bins=num_bins,
+                                                                                   tails=tails, activation=activation,
+                                                                                   context_features=context_features)]
+        else: 
+            transform_list += [
+                transforms.MaskedPiecewiseRationalQuadraticAutoregressiveTransform(inp_dim, nodes,
+                                                                                   num_blocks=num_blocks,
+                                                                                   tail_bound=tail_bound,
+                                                                                   num_bins=num_bins,
+                                                                                   tails=tails, activation=activation,
+                                                                                   context_features=context_features)]
+            
         if lu:
             transform_list += [transforms.LULinear(inp_dim)]
         else:
