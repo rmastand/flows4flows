@@ -170,6 +170,10 @@ class FlowForFlow(abc.ABC, flows.Flow):
         noise, logabsdet = self.transform(inputs, input_context, target_context, inverse)
         log_prob = self.bd_log_prob(noise, input_context, target_context, inverse)
         dist_pen = -self.distance_object(noise, inputs)
+        #print("log prob", log_prob.mean())
+        #print("logabsdet", logabsdet.mean())
+        #print("distance penalty", dist_pen.mean())
+        #print()
         return log_prob + logabsdet + dist_pen
 
     def _sample(self, num_samples, context):  # , inverse=False):
