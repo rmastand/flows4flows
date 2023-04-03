@@ -1,6 +1,6 @@
 output:
-  save_dir: ./flows4flows/
-  name: writeup
+  save_dir: /global/home/users/rrmastandrea/flows4flows/writeup/
+  name: fourcircles_fourcircles_nocond_identinit
 
 general:
   data_dim: 2
@@ -9,8 +9,8 @@ general:
 
 base_dist:
   left:
-    data: Ring
-    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/ring_star_nocond_f4f/base_left/epoch_19.pt
+    data: FourCircles
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/fourcircles_fourcircles_nocond_f4f/base_left/epoch_19.pt
     batch_size: 128
     lr: 1e-4
     nepochs: 20
@@ -22,8 +22,8 @@ base_dist:
     activation: relu
 
   right:
-    data: Star
-    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/ring_star_nocond_f4f/base_right/epoch_19.pt
+    data: FourCircles
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/fourcircles_fourcircles_nocond_f4f/base_right/epoch_19.pt
     batch_size: 128
     lr: 1e-4
     nepochs: 20
@@ -48,10 +48,10 @@ top_transformer:
   nnodes: 128
   nbins: 8
   activation: relu
-  penalty: l1
-  penalty_weight: .01
+  penalty: None
+  penalty_weight: 0
   anneal: 0
-  identity_init: 0
+  identity_init: 1
 
 defaults:
   - _self_

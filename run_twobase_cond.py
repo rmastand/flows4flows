@@ -95,7 +95,7 @@ def main(cfg: DictConfig) -> None:
         exit(42)
 
     # Set device
-    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 
     # Get training data
     n_points = int(cfg.general.n_points)
@@ -169,6 +169,7 @@ def main(cfg: DictConfig) -> None:
             df.to_hdf(bd_path / 'eval_data.h5', f'base_dist')
 
     # Train Flow4Flow
+    print(f"Identity init: {cfg.top_transformer.identity_init}")
     f4flow = get_flow4flow('discretebasecondition',
                            spline_inn(cfg.general.data_dim,
                                       nodes=cfg.top_transformer.nnodes,
@@ -178,7 +179,8 @@ def main(cfg: DictConfig) -> None:
                                       activation=get_activation(cfg.top_transformer.activation),
                                       num_bins=cfg.top_transformer.nbins,
                                       context_features=ncond_base,
-                                      flow_for_flow=True
+                                      flow_for_flow=True,
+                                      identity_init = cfg.top_transformer.identity_init
                                       ),
                            distribution_right=base_flow_r,
                            distribution_left=base_flow_l)
@@ -241,7 +243,12 @@ def main(cfg: DictConfig) -> None:
         for con in test_points:
             # Handle the broadcasting
             # TODO this isn't generic across the different conditional datasets
-            con *= test_data.max_angle
+            if condition_type == "rotation":
+                con *= test_data.max_angle
+            elif condition_type == "radial":
+                con *= test_data.max_scale
+            else:
+                print("ERROR: not implemented")
             left_data, left_cond = test_data._get_conditional(con.item())
             left_data = torch.Tensor(left_data).to(device)
             left_cond = (left_cond * torch.ones(len(left_data), 1)).to(device)
