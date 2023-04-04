@@ -82,7 +82,7 @@ def main(cfg: DictConfig) -> None:
         OmegaConf.save(config=cfg, f=file)
 
     # Set device
-    device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 
     # Get training data
     n_points = int(cfg.general.n_points)
@@ -137,7 +137,6 @@ def main(cfg: DictConfig) -> None:
         plot_data(base_flow.sample(int(1e5)), outputpath / f'base_density_{label}_samples.png')
 
     # Train Flow4Flow
-    print(f"Identity init: {cfg.top_transformer.identity_init}")
     f4flow = get_flow4flow(cfg.top_transformer.flow4flow,
                            spline_inn(cfg.general.data_dim,
                                       nodes=cfg.top_transformer.nnodes,
@@ -152,8 +151,17 @@ def main(cfg: DictConfig) -> None:
                                       ),
                            distribution_right=base_flow_r,
                            distribution_left=base_flow_l)
-
+    
     set_penalty(f4flow, cfg.top_transformer.penalty, cfg.top_transformer.penalty_weight, cfg.top_transformer.anneal)
+    
+    print("Training additions for Flow4Flow model:")
+    if cfg.top_transformer.identity_init:
+        print("Model initialized to the identity.")
+    if cfg.top_transformer.penalty is not None:
+        print(f"Model trained with {cfg.top_transformer.penalty} loss with weight {cfg.top_transformer.penalty_weight}.")
+    if (not cfg.top_transformer.identity_init) and (cfg.top_transformer.penalty is None):
+        print("None.")
+    print("**********")
 
     train_data = UnconditionalDataToData(get_data(cfg.base_dist.left.data, n_points),
                                          get_data(cfg.base_dist.right.data, n_points))  # \

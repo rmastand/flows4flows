@@ -151,6 +151,7 @@ def main(cfg: DictConfig) -> None:
 
 
     # Train Flow4Flow
+    print(f"Identity init: {cfg.top_transformer.identity_init}")
     f4flow = get_flow4flow('discretebasecondition',
                            spline_inn(cfg.general.data_dim,
                                       nodes=cfg.top_transformer.nnodes,
@@ -160,7 +161,8 @@ def main(cfg: DictConfig) -> None:
                                       activation=get_activation(cfg.top_transformer.activation),
                                       num_bins=cfg.top_transformer.nbins,
                                       context_features=ncond_base,
-                                      flow_for_flow=True
+                                      flow_for_flow=True,
+                                      identity_init = cfg.top_transformer.identity_init
                                       ),
                            distribution_right=base_flow_r,
                            distribution_left=base_flow_l)
