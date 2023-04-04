@@ -154,14 +154,21 @@ def main(cfg: DictConfig) -> None:
     
     set_penalty(f4flow, cfg.top_transformer.penalty, cfg.top_transformer.penalty_weight, cfg.top_transformer.anneal)
     
+    print("\n")
+    print("**********")
+    print("\n")
+    
     print("Training additions for Flow4Flow model:")
     if cfg.top_transformer.identity_init:
         print("Model initialized to the identity.")
-    if cfg.top_transformer.penalty is not None:
+    if cfg.top_transformer.penalty not in [None, "None"]:
         print(f"Model trained with {cfg.top_transformer.penalty} loss with weight {cfg.top_transformer.penalty_weight}.")
-    if (not cfg.top_transformer.identity_init) and (cfg.top_transformer.penalty is None):
+    if (not cfg.top_transformer.identity_init) and (cfg.top_transformer.penalty in [None, "None"]):
         print("None.")
+    
+    print("\n")
     print("**********")
+    print("\n")
 
     train_data = UnconditionalDataToData(get_data(cfg.base_dist.left.data, n_points),
                                          get_data(cfg.base_dist.right.data, n_points))  # \
