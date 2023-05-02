@@ -107,7 +107,7 @@ class RotatedData(ConditionalWrapper):
 
 class RadialScale(ConditionalWrapper):
 
-    def __init__(self, base_dataset, max_scale=1, minscale=0.5):
+    def __init__(self, base_dataset, max_scale=3, minscale=0.5):
         self.max_scale = max_scale
         self.min_scale = minscale
         super(RadialScale, self).__init__(base_dataset)
