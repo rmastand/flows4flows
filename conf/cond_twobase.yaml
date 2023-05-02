@@ -1,6 +1,6 @@
 output:
-  save_dir: /global/home/users/rrmastandrea/flows4flows/writeup/
-  name: checkerboard_checkerboard_rotation_identinit
+  save_dir: /global/home/users/rrmastandrea/flows4flows/writeup2/
+  name: star_star_rotation_identinit
 
 general:
   data_dim: 2
@@ -11,11 +11,11 @@ general:
 base_dist:
   plot: True
   left:
-    data: checkerboard
-    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/checkerboard_checkerboard_rotation_f4f/base_left/epoch_31.pt
+    data: star
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/star_star_rotation_f4f/base_left/epoch_59.pt
     batch_size: 128
     lr: 1e-4
-    nepochs: 32
+    nepochs: 60
     gclip: 5
     nstack: 4
     nblocks: 2
@@ -24,11 +24,11 @@ base_dist:
     activation: relu
 
   right:
-    data: checkerboard
-    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/checkerboard_checkerboard_rotation_f4f/base_right/epoch_31.pt
+    data: star
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/star_star_rotation_f4f/base_right/epoch_59.pt
     batch_size: 128
     lr: 1e-4
-    nepochs: 32
+    nepochs: 60
     gclip: 5
     nstack: 4
     nblocks: 2
@@ -40,16 +40,16 @@ top_transformer:
   load_path: None
   batch_size: 128
   lr: 1e-4
-  nepochs: 12
+  nepochs: 64
   gclip: 5
-  nstack: 4
-  nblocks: 2
+  nstack: 8
+  nblocks: 3
   nnodes: 128
   nbins: 8
   activation: relu
   penalty: None
   penalty_weight: 1
-  anneal: 1
+  anneal: 0
   direction: alternate
   identity_init: 1
 

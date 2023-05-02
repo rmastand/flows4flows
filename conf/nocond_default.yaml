@@ -1,19 +1,19 @@
 output:
-  save_dir: /global/home/users/rrmastandrea/flows4flows/writeup/
-  name: fourcircles_fourcircles_nocond_identinit
+  save_dir: /global/home/users/rrmastandrea/flows4flows/writeup2/
+  name: checkerboard_star_nocond_identinit
 
 general:
   data_dim: 2
-  n_points: 1e5
+  n_points: 1e6
   ncond: 0
 
 base_dist:
   left:
-    data: FourCircles
-    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/fourcircles_fourcircles_nocond_f4f/base_left/epoch_19.pt
+    data: checkerboard
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/checkerboard_checkerboard_nocond_f4f/base_left/epoch_59.pt
     batch_size: 128
     lr: 1e-4
-    nepochs: 20
+    nepochs: 60
     gclip: 5
     nstack: 4
     nblocks: 2
@@ -22,11 +22,11 @@ base_dist:
     activation: relu
 
   right:
-    data: FourCircles
-    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/fourcircles_fourcircles_nocond_f4f/base_right/epoch_19.pt
+    data: star
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/star_star_nocond_f4f/base_left/epoch_59.pt
     batch_size: 128
     lr: 1e-4
-    nepochs: 20
+    nepochs: 60
     gclip: 5
     nstack: 4
     nblocks: 2
@@ -38,18 +38,18 @@ top_transformer:
   load_path: None
   batch_size: 128
   lr: 1e-4
-  nepochs: 20
+  nepochs: 64
   flow4flow: discretebase
   direction: alternate
   iteration_steps: 5
   gclip: 5
-  nstack: 4
-  nblocks: 2
+  nstack: 8
+  nblocks: 3
   nnodes: 128
   nbins: 8
   activation: relu
   penalty: None
-  penalty_weight: 0
+  penalty_weight: 1
   anneal: 0
   identity_init: 1
 

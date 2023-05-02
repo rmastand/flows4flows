@@ -132,7 +132,6 @@ def main(cfg: DictConfig) -> None:
                                                                    [val_base_data_l, val_base_data_r],
                                                                    [cfg.base_dist.left, cfg.base_dist.right],
                                                                    [base_flow_l, base_flow_r]):
-
         if pathlib.Path(bd_conf.load_path).is_file():
             print(f"Loading base_{label} from model: {bd_conf.load_path}")
             base_flow.load_state_dict(torch.load(bd_conf.load_path, map_location=device))
