@@ -1,0 +1,64 @@
+output:
+  save_dir: /global/home/users/rrmastandrea/flows4flows/writeup2/
+  name: star_star_rotation_L1_identinit
+
+general:
+  data_dim: 2
+  n_points: 1e6
+  ncond: 1
+  condition: rotation
+
+base_dist:
+  plot: True
+  left:
+    data: star
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/star_star_rotation_f4f/base_left/epoch_59.pt
+    batch_size: 128
+    lr: 1e-4
+    nepochs: 60
+    gclip: 5
+    nstack: 4
+    nblocks: 2
+    nnodes: 128
+    nbins: 8
+    activation: relu
+
+  right:
+    data: star
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/star_star_rotation_f4f/base_right/epoch_59.pt
+    batch_size: 128
+    lr: 1e-4
+    nepochs: 60
+    gclip: 5
+    nstack: 4
+    nblocks: 2
+    nnodes: 128
+    nbins: 8
+    activation: relu
+
+top_transformer:
+  load_path: None
+  batch_size: 128
+  lr: 1e-4
+  nepochs: 64
+  gclip: 5
+  nstack: 8
+  nblocks: 3
+  nnodes: 128
+  nbins: 8
+  activation: relu
+  penalty: l1
+  penalty_weight: 1
+  anneal: 0
+  direction: alternate
+  identity_init: 1
+
+defaults:
+  - _self_
+  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled
+
+hydra:
+  output_subdir: null
+  run:
+    dir: .
