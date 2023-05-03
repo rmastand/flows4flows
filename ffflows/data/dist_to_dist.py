@@ -75,3 +75,11 @@ class ConditionalDataToTarget(UnconditionalDataToData):
         else:
             data2 = torch.broadcast_to(self.data2,self.data1[1].shape)
             return (*self.data1,data2)
+
+        
+class PairedConditionalDataToTarget(ConditionalDataToTarget):
+
+    def paired(self):
+        # assuming data is of form (data,condition)
+        data1, data2 = [shuffle_tensor(data) for data in (self.data1, self.data2)]
+        return PairedList((*data1, data1[1]), (*data2, data2[1]))
