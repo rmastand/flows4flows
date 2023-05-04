@@ -272,18 +272,17 @@ def train_batch_iterate(model, train_data, val_data, n_epochs, learning_rate, nc
         for step, pairdata in enumerate(train_data):
             model.train()
             if step % 2 == 0 + 1 * int(inverse):
-                data = pairdata[0].to(device)
+                data = pairdata[0]
                 inv = False
             else:
-                data = pairdata[1].to(device)
+                data = pairdata[1]
                 inv = True
 
             optimizer.zero_grad()
             if ncond is not None:
-                inputs, context_l, context_r = data[ddir][0].to(device), data[ddir][1].to(device), data[ddir][2].to(
-                    device)
+                inputs, context_l, context_r = data[0].to(device), data[1].to(device), data[2].to(device)
                 if rand_perm_target:
-                    context_r = shuffle_tensor(context_l)
+                    context_r = shuffle_tensor(context_r)
             else:
                 inputs, context_l, context_r = data.to(device), None, None
 
@@ -313,7 +312,7 @@ def train_batch_iterate(model, train_data, val_data, n_epochs, learning_rate, nc
                                                            inverse=ddir).mean()
         valid_loss[epoch] = v_loss.mean()
 
-        torch.save(model.state_dict(), save_path / f'epoch_{epoch}_valloss_{valid_loss[epoch]:.3f}.pt')
+        torch.save(model.state_dict(), save_path / f'epoch_{epoch}.pt')
         print(f"Loss = {train_loss[epoch]:.3f},\t val_loss = {valid_loss[epoch]:.3f}")
 
     ###insert saving of losses and plots and stuff
@@ -326,7 +325,6 @@ def train_batch_iterate(model, train_data, val_data, n_epochs, learning_rate, nc
 
     model.eval()
     return train_loss, valid_loss
-
 
 def tensor_to_str(tensor):
     '''Convert a tensor to a string or list of strings. Can be a tensor of shape (), (N,), (N,M), and any other squeezeable shapes'''
