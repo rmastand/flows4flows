@@ -52,7 +52,8 @@ class FlowForFlow(abc.ABC, flows.Flow):
         if input_context is None:
             return None
         else:
-            return self._direction_func(input_context, target_context).view(-1)
+            direct = self._direction_func(input_context, target_context)
+            return direct.view(-1) if direct is not None else direct
 
     def set_forward_base(self):
         '''Just in case we need to change the base distribution in the subclass'''
