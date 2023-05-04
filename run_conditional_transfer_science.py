@@ -122,9 +122,7 @@ def main(cfg: DictConfig) -> None:
     ncond_base = None if cfg.general.ncond == 0 else cfg.general.ncond
 
     # Train base
-    # CHANGED: only training the left flow
-    #base_flow_l, base_flow_r = [BaseFlow(spline_inn(cfg.general.data_dim,
-    base_flow_l = BaseFlow(spline_inn(cfg.general.data_dim,
+    base_flow_l, base_flow_r = [BaseFlow(spline_inn(cfg.general.data_dim,
                                                     nodes=cfg.base_dist.left.nnodes,
                                                     num_blocks=cfg.base_dist.left.nblocks,
                                                     num_stack=cfg.base_dist.left.nstack,
@@ -134,14 +132,14 @@ def main(cfg: DictConfig) -> None:
                                                     context_features=ncond_base
                                                     ),
                                          StandardNormal([cfg.general.data_dim]))
-    #                                    ) for bd_conf in [cfg.base_dist.left, cfg.base_dist.right]
+                                     for bd_conf in [cfg.base_dist.left, cfg.base_dist.right]]
                                        
                         
-    for label, base_data, val_base_data, bd_conf, base_flow in zip(['left'],#, 'right'],
-                                                                   [train_base_data],#, base_data_r],
-                                                                   [val_base_data],#, val_base_data_r],
-                                                                   [cfg.base_dist.left],#, cfg.base_dist.right],
-                                                                   [base_flow_l]):#, base_flow_r]):
+    for label, base_data, val_base_data, bd_conf, base_flow in zip(['left', 'right'],
+                                                                   [train_base_data, train_target_data],
+                                                                   [val_base_data, val_target_data],
+                                                                   [cfg.base_dist.left, cfg.base_dist.right],
+                                                                   [base_flow_l, base_flow_r]):
 
         if pathlib.Path(bd_conf.load_path).is_file():
             print(f"Loading base_{label} from model: {bd_conf.load_path}")
@@ -156,7 +154,6 @@ def main(cfg: DictConfig) -> None:
 
        
     # Train Flow4Flow
-    # CHANGED: only 1 base                                                        
     f4flow = get_flow4flow('discretebasecondition',
                            spline_inn(cfg.general.data_dim,
                                       nodes=cfg.top_transformer.nnodes,
@@ -168,13 +165,10 @@ def main(cfg: DictConfig) -> None:
                                       context_features=ncond_base,
                                       flow_for_flow=True
                                       ),
-                           distribution_right=base_flow_l)#,
-                         #  distribution_left=base_flow_l)
+                           distribution_right=base_flow_l,
+                           distribution_left=base_flow_l)
 
     set_penalty(f4flow, cfg.top_transformer.penalty, cfg.top_transformer.penalty_weight, cfg.top_transformer.anneal)
-
-    #train_data = PairedConditionalDataToTarget(*get_datasets(cfg))
-    #val_data = PairedConditionalDataToTarget(*get_datasets(cfg))
 
     if pathlib.Path(cfg.top_transformer.load_path).is_file():
         print(f"Loading Flow4Flow from model: {cfg.top_transformer.load_path}")
@@ -201,18 +195,16 @@ def main(cfg: DictConfig) -> None:
         if (direction == 'forward' or direction == 'both'):
             print("Training Flow4Flow model forwards")
             train_f4f_forward(f4flow,
-                              #DataLoader(train_data.left(), batch_size=cfg.top_transformer.batch_size, shuffle=True),
-                              #DataLoader(val_data.left(), batch_size=1000),
-                              train_target_data,
-                              val_target_data, 
+                              train_base_data,
+                              val_base_data, 
                               cfg.top_transformer.nepochs, cfg.top_transformer.lr, ncond_base,
                               outputpath, name='f4f_fwd', device=device, gclip=cfg.top_transformer.gclip)
 
         if (direction == 'inverse' or direction == 'both'):
             print("Training Flow4Flow model backwards")
             train_f4f_inverse(f4flow,
-                              DataLoader(train_data.right(), batch_size=cfg.top_transformer.batch_size, shuffle=True),
-                              DataLoader(val_data.right(), batch_size=1000),
+                              train_target_data,
+                              val_target_data, 
                               cfg.top_transformer.nepochs, cfg.top_transformer.lr, ncond_base,
                               outputpath, name='f4f_inv', device=device, gclip=cfg.top_transformer.gclip)
   
