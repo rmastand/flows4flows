@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 
 from nflows.distributions import StandardNormal
 
-from ffflows.utils import get_activation, get_data, get_flow4flow, train, train_batch_iterate, spline_inn, coupling_flow, set_penalty, dump_to_df, get_conditional_data, tensor_to_str
+from ffflows.utils import get_activation, get_data, get_flow4flow, train, train_batch_iterate, spline_inn, set_penalty, dump_to_df, get_conditional_data, tensor_to_str
 import matplotlib.pyplot as plt
 from ffflows.plot import plot_training, plot_data, plot_arrays
 

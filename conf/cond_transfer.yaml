@@ -11,7 +11,7 @@ base_dist:
   plot: False
   batch_size: 128
   left:
-    load_path: None
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/science/base_left/epoch_49_valloss_4.864.pt
     lr: 1e-4
     nepochs: 50
     gclip: 5
