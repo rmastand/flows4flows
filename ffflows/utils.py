@@ -230,7 +230,7 @@ def train(model, train_data, val_data, n_epochs, learning_rate, ncond, path, nam
                                                  inverse=inverse).mean()
         valid_loss[epoch] = v_loss.mean()
 
-        torch.save(model.state_dict(), save_path / f'epoch_{epoch}_valloss_{valid_loss[epoch]:.3f}.pt')
+        torch.save(model.state_dict(), save_path / f'epoch_{epoch}.pt')
         print(f"Loss = {train_loss[epoch]:.3f},\t val_loss = {valid_loss[epoch]:.3f}")
 
     ###insert saving of losses and plots and stuff
@@ -347,10 +347,13 @@ def tensor_to_str(tensor):
 
 def dump_to_df(*args, col_names=None):
     data = [tensor2numpy(d) for d in args]
-    if len(np.unique(lens := [len(d) for d in data])) != 1:
+    lens = [len(d) for d in data]
+    shapes = [d.shape[:-1] for d in data]
+    if len(np.unique(lens)) != 1:
         print(f"Arrays not all same length, received f{lens}")
         exit(50)
-    elif len(np.unique(shapes := [d.shape[:-1] for d in data])) != 1:
+        
+    elif len(np.unique(shapes)) != 1:
         print(f"Arrays not all same shape up until last axis, received f{shapes}")
         exit(51)
     data = np.concatenate(data, axis=-1)
