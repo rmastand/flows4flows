@@ -1,6 +1,6 @@
 output:
   save_dir: ./flows4flows/
-  name: science
+  name: science2
 
 general:
   data_dim: 5
