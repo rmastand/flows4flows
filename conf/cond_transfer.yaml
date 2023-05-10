@@ -1,6 +1,6 @@
 output:
   save_dir: ./flows4flows/
-  name: science2
+  name: science
 
 general:
   data_dim: 5
@@ -56,7 +56,7 @@ top_transformer:
   penalty: None
   penalty_weight: 1
   anneal: 1
-  direction: forward
+  direction: inverse
 
 defaults:
   - _self_

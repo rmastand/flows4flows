@@ -1,7 +1,7 @@
 output:
   save_dir: /global/home/users/rrmastandrea/flows4flows/writeup2/
-  name: star_star_rotation_L1_identinit
-
+  name: checkerboard_checkerboard_rotation_identinit
+  
 general:
   data_dim: 2
   n_points: 1e6
@@ -11,8 +11,8 @@ general:
 base_dist:
   plot: True
   left:
-    data: star
-    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/star_star_rotation_f4f/base_left/epoch_59.pt
+    data: checkerboard
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/checkerboard_checkerboard_rotation_f4f/base_left/epoch_59.pt
     batch_size: 128
     lr: 1e-4
     nepochs: 60
@@ -24,8 +24,8 @@ base_dist:
     activation: relu
 
   right:
-    data: star
-    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/star_star_rotation_f4f/base_right/epoch_59.pt
+    data: checkerboard
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/checkerboard_checkerboard_rotation_f4f/base_right/epoch_59.pt
     batch_size: 128
     lr: 1e-4
     nepochs: 60
@@ -47,7 +47,7 @@ top_transformer:
   nnodes: 128
   nbins: 8
   activation: relu
-  penalty: l1
+  penalty: None
   penalty_weight: 1
   anneal: 0
   direction: alternate
