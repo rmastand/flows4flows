@@ -151,7 +151,6 @@ def main(cfg: DictConfig) -> None:
 
 
     # Train Flow4Flow
-    print(f"Identity init: {cfg.top_transformer.identity_init}")
     f4flow = get_flow4flow('discretebasecondition',
                            spline_inn(cfg.general.data_dim,
                                       nodes=cfg.top_transformer.nnodes,
@@ -174,6 +173,24 @@ def main(cfg: DictConfig) -> None:
 
     train_data = PairedConditionalDataToTarget(*set1)
     val_data = PairedConditionalDataToTarget(*set2)
+    
+    
+    print("\n")
+    print("**********")
+    print("\n")
+    
+    print("Training additions for Flow4Flow model:")
+    if cfg.top_transformer.identity_init:
+        print("Model initialized to the identity.")
+    if cfg.top_transformer.penalty not in [None, "None"]:
+        print(f"Model trained with {cfg.top_transformer.penalty} loss with weight {cfg.top_transformer.penalty_weight}.")
+    if (not cfg.top_transformer.identity_init) and (cfg.top_transformer.penalty in [None, "None"]):
+        print("None.")
+    
+    print("\n")
+    print("**********")
+    print("\n")
+
         
 
 
