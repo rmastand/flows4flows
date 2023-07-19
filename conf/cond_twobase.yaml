@@ -1,6 +1,6 @@
 output:
   save_dir: /global/home/users/rrmastandrea/flows4flows/writeup2/
-  name: star_star_rotation_identinit
+  name: star_checkerboard_rotation_identinit
 
 general:
   data_dim: 2
@@ -24,8 +24,8 @@ base_dist:
     activation: relu
 
   right:
-    data: star
-    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/star_star_rotation_f4f/base_right/epoch_59.pt
+    data: checkerboard
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/checkerboard_checkerboard_rotation_f4f/base_right/epoch_59.pt
     batch_size: 128
     lr: 1e-4
     nepochs: 60

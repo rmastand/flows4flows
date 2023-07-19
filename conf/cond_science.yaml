@@ -1,5 +1,5 @@
 output:
-  save_dir: global/home/users/rrmastandrea/flows4flows/writeup/
+  save_dir: global/home/users/rrmastandrea/flows4flows/writeup2/
   name: science_identinit
 
 general:
@@ -9,10 +9,10 @@ general:
 base_dist:
   plot: True
   left:
-    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/science_inv/base_left/epoch_31.pt
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/science/base_left/epoch_59.pt
     batch_size: 128
     lr: 1e-4
-    nepochs: 32
+    nepochs: 60
     gclip: 5
     nstack: 4
     nblocks: 2
@@ -21,10 +21,10 @@ base_dist:
     activation: relu
 
   right:
-    load_path: /global/home/users/rrmastandrea/flows4flows/writeup/science_inv/base_right/epoch_31.pt
+    load_path: /global/home/users/rrmastandrea/flows4flows/writeup2/science/base_right/epoch_59.pt
     batch_size: 128
     lr: 1e-4
-    nepochs: 32
+    nepochs: 60
     gclip: 5
     nstack: 4
     nblocks: 2
@@ -36,10 +36,10 @@ top_transformer:
   load_path: None
   batch_size: 128
   lr: 1e-4
-  nepochs: 32
+  nepochs: 64
   gclip: 5
-  nstack: 4
-  nblocks: 2
+  nstack: 8
+  nblocks: 3
   nnodes: 128
   nbins: 8
   activation: relu
