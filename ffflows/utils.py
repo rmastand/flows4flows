@@ -19,7 +19,6 @@ from nflows.utils import tensor2numpy
 import pandas as pd
 import numpy as np
 
-from dense import dense_net
 
 # from plot import plot_training
 import matplotlib.pyplot as plt
@@ -180,6 +179,7 @@ def spline_inn(inp_dim, nodes=128, num_blocks=2, num_stack=3, tail_bound=3.5, ta
     return transforms.CompositeTransform(transform_list)
 
 # CHANGED
+"""
 def coupling_flow(inp_dim, nodes=128, num_blocks=2, num_stack=3, tail_bound=3.5, tails='linear', activation=F.relu, lu=0,
                num_bins=10, context_features=None, flow_for_flow=False):
     
@@ -212,7 +212,7 @@ def coupling_flow(inp_dim, nodes=128, num_blocks=2, num_stack=3, tail_bound=3.5,
         transform_list = transform_list[:-1]
 
     return transforms.CompositeTransform(transform_list)
-
+"""
 
 def train(model, train_data, val_data, n_epochs, learning_rate, ncond, path, name, rand_perm_target=False,
           inverse=False, loss_fig=True, device='cpu', gclip=None):
