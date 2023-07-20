@@ -1,10 +1,11 @@
 output:
   save_dir: global/home/users/rrmastandrea/flows4flows/writeup2/
-  name: science_identinit
+  name: science_L1
 
 general:
   data_dim: 5
   ncond: 1
+  cuda_slot: 0
   
 base_dist:
   plot: True
@@ -43,11 +44,11 @@ top_transformer:
   nnodes: 128
   nbins: 8
   activation: relu
-  penalty: None
-  penalty_weight: 1
+  penalty: l1
+  penalty_weight: 0.05
   anneal: 0
   direction: alternate
-  identity_init: 1
+  identity_init: 0
 
 defaults:
   - _self_

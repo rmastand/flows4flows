@@ -96,7 +96,7 @@ def main(cfg: DictConfig) -> None:
         exit(42)
 
     # Set device
-    device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+    device = torch.device(f"cuda:{cfg.general.cuda_slot}" if torch.cuda.is_available() else "cpu")
 
     # CHANGED: LHCO data
     ncond_base = None if cfg.general.ncond == 0 else cfg.general.ncond
@@ -253,16 +253,15 @@ def main(cfg: DictConfig) -> None:
                               cfg.top_transformer.nepochs, cfg.top_transformer.lr, ncond_base,
                               outputpath, name='f4f_inv', device=device, gclip=cfg.top_transformer.gclip)
 
+    """
     with torch.no_grad():
         f4flow.to(device)
-
        
         flow4flow_dir = outputpath / 'flow4flow_plots'
         flow4flow_dir.mkdir(exist_ok=True, parents=True)
         debug_dir = flow4flow_dir / 'debug'
         debug_dir.mkdir(exist_ok=True, parents=True)
        
-
         # Transform the data
         transformed, _ = f4flow.batch_transform(val_sim_data, val_sim_cont, val_dat_cont, batch_size=1000)
         # Plot the output densities
@@ -278,6 +277,7 @@ def main(cfg: DictConfig) -> None:
                                    'transformed_x', 'transformed_y', 'left_enc_x', 'left_enc_y',
                                    'base_transfer_x', 'base_transfer_y'])
         df.to_hdf(flow4flow_dir / 'eval_data_conditional.h5', f'f4f')
+     """
 
 
 if __name__ == "__main__":

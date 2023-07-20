@@ -45,7 +45,7 @@ def main(cfg: DictConfig) -> None:
         exit(42)
 
     # Set device
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device(f"cuda:{cfg.general.cuda_slot}" if torch.cuda.is_available() else "cpu")
 
     # Get training data
     def get_data(n_points):
@@ -111,10 +111,27 @@ def main(cfg: DictConfig) -> None:
                                       activation=get_activation(cfg.top_transformer.activation),
                                       num_bins=cfg.top_transformer.nbins,
                                       context_features=n_cond,
-                                      flow_for_flow=True
+                                      flow_for_flow=True,
+                                      identity_init = cfg.top_transformer.identity_init
                                       ),
                            base_flow)
     set_penalty(f4flow, cfg.top_transformer.penalty, cfg.top_transformer.penalty_weight, cfg.top_transformer.anneal)
+    
+    print("\n")
+    print("**********")
+    print("\n")
+    
+    print("Training additions for Flow4Flow model:")
+    if cfg.top_transformer.identity_init:
+        print("Model initialized to the identity.")
+    if cfg.top_transformer.penalty not in [None, "None"]:
+        print(f"Model trained with {cfg.top_transformer.penalty} loss with weight {cfg.top_transformer.penalty_weight}.")
+    if (not cfg.top_transformer.identity_init) and (cfg.top_transformer.penalty in [None, "None"]):
+        print("None.")
+    
+    print("\n")
+    print("**********")
+    print("\n")
 
     if pathlib.Path(cfg.top_transformer.load_path).is_file():
         print(f"Loading Flow4Flow from model: {cfg.top_transformer.load_path}")

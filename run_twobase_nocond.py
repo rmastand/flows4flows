@@ -82,7 +82,7 @@ def main(cfg: DictConfig) -> None:
         OmegaConf.save(config=cfg, f=file)
 
     # Set device
-    device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+    device = torch.device(f"cuda:{cfg.general.cuda_slot}" if torch.cuda.is_available() else "cpu")
 
     # Get training data
     n_points = int(cfg.general.n_points)

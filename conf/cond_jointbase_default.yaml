@@ -1,11 +1,12 @@
 output:
-  save_dir: /srv/beegfs/scratch/groups/rodem/flows4flows/
+  save_dir: /global/home/users/rrmastandrea/flows4flows/writeup2/
   name: test
 
 general:
   data_dim: 2
-  n_points: 1e6
+  n_points: 1e5
   ncond: 1
+  cuda_slot: 1
 
 base_dist:
   condition: rotation
@@ -13,7 +14,7 @@ base_dist:
   load_path: None
   batch_size: 128
   lr: 1e-4
-  nepochs: 32
+  nepochs: 2
   gclip: 5
   nstack: 4
   nblocks: 2
@@ -28,7 +29,7 @@ top_transformer:
   load_path: None
   batch_size: 128
   lr: 1e-4
-  nepochs: 12
+  nepochs: 2
   flow4flow: delta
   gclip: 5
   nstack: 4
@@ -42,6 +43,7 @@ top_transformer:
   penalty: None
   penalty_weight: 1
   anneal: 1
+  identity_init: 1
 
 defaults:  
   - _self_  
