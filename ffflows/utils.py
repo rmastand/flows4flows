@@ -157,7 +157,6 @@ def spline_inn(inp_dim, nodes=128, num_blocks=2, num_stack=3, tail_bound=3.5, ta
                                                                              tails=tails, activation=activation,
                                                                              context_features=context_features,
                                                                              identity_init=identity_init)]
-        else: 
         if lu:
             transform_list += [transforms.LULinear(inp_dim)]
         else:
