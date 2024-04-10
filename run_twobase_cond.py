@@ -179,7 +179,8 @@ def main(cfg: DictConfig) -> None:
                                       num_bins=cfg.top_transformer.nbins,
                                       context_features=ncond_base,
                                       flow_for_flow=True,
-                                      identity_init = cfg.top_transformer.identity_init
+                                      identity_init = cfg.top_transformer.identity_init,
+      
                                       ),
                            distribution_right=base_flow_r,
                            distribution_left=base_flow_l)
